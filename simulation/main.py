@@ -1,86 +1,12 @@
+"""
+Simulateur du bras robotique.
+Objectif : trouver les angles des servomoteurs pour atteindre un objet à une distance x,y et la pince du bras dans un angle t.
+"""
+
+import askFor as askFor
+import console as console
 import matplotlib.pyplot as plt
 from math import *
-import askFor as askFor
-
-def calculCoordonne(Sx, Sy, B, a, h, x):
-    """ Calcule les coordonnées des points du bras robot. """
-    Sx[0] = 0
-    Sy[0] = 0
-    
-    Sx[1] = 0
-    Sy[1] = h
-
-    Sx[2] = Sx[1] + B[1]*sin(a[0])
-    Sy[2] = Sy[1] + B[1]*cos(a[0])
-
-    Sx[3] = Sx[2] + B[2]*sin(a[0]+a[1])
-    Sy[3] = Sy[2] + B[2]*cos(a[0]+a[1])
-
-    Sx[4] = Sx[3] + B[3]*sin(a[0]+a[1]+a[2])
-    Sy[4] = Sy[3] + B[3]*cos(a[0]+a[1]+a[2])
-
-    return Sx, Sy
-
-def calculAngle(a, x, y, B, theta,h):
-    """ Calcule les angles du bras robot. """
-    
-    a[0] = acos( (y-B[2*cos(theta)]-h) / B[0]+B[1]*cos(a[1]) + sin(a[1]) * (B[1]*x-B[2]*sin(theta)) / (B[0]+B[1]*cos(a[1])) )
-    
-    a[1] = acos( (x**2+(y-h)**2+B[2]**2-2*B[2*(x*sin(theta)+(y-h)*cos(theta))]) - (B[0]**2 - B[1]**2 ) / (2*B[0]*B[1]) )
-    
-    a[2] = theta - a[0]-a[1]
-    
-    return a
-
-def AffichageAngles(A):
-    """ Affiche les angles du bras robot. """
-    print("\n" + 40*"-")
-    for i in range(len(A)):
-        print(f"Angle {i} : {round(A[i],4)} radian | {round(degrees(A[i]),4)} degré")
-    print(40*"-"+ "\n")
-
-def affichageBras(listeSx, listeSy):
-    """ Affiche les segments du bras robot. """
-    plt.clf()
-    for i in range(len(listeSx)-1):
-        plt.plot([listeSx[i], listeSx[i+1]], [listeSy[i], listeSy[i+1]], label=f"B{i}")
- 
-    plt.grid(True)
-    plt.axis('equal')
-    plt.xlim(-10, 200)
-    plt.ylim(-10, 300)
-
-def demonstration1(Sx, Sy, x, h, B, a):
-    xmax = 10
-    xmin = 1
-    plt.show
-    while True:
-        while x < xmax:
-            x += 0.01
-            Sx, Sy = calculCoordonne(Sx, Sy, x, h, B, a)
-            plt.pause(0.05)
-            plt.clf()
-            affichageBras(Sx, Sy)
-        while x > xmin:
-            x-=0.01
-            Sx, Sy = calculCoordonne(Sx, Sy, x, h, B, a)
-            plt.pause(0.05)
-            affichageBras(Sx, Sy)
-
-def demonstration2(Sx, Sy, x, h, B, angles):
-    """Animation des angles du bras."""
-    plt.ion()  # Mode interactif
-    while True:
-        # Update angles
-        for i in range(len(angles)):
-            angles[i] += 1
-            if angles[i] > 90:
-                angles[i] = 0
-                
-        # Calculate and display
-        Sx, Sy = calculCoordonne(Sx, Sy, x, h, B, angles)
-        affichageBras(Sx, Sy)
-        plt.pause(0.05)
 
 def degreeToRadian(A):
     """ Convertit les angles en degrés en radians. """
@@ -88,59 +14,180 @@ def degreeToRadian(A):
         A[i] = radians(A[i])
     return A
 
+
+def calculCoordonne(B, A):
+    """ Calcule les coordonnées des points du bras robot. """
+
+    Sx,Sy = [],[]
+    for i in range(len(A)+1):
+        Sx.append(0)
+        Sy.append(0)
+
+    Sx[0] = 0
+    Sy[0] = 0
+    
+    Sx[1] = Sx[0] + B[0]*sin(A[0])
+    Sy[1] = Sy[0] + B[0]*cos(A[0])
+
+    Sx[2] = Sx[1] + B[1]*sin(A[0]+A[1])
+    Sy[2] = Sy[1] + B[1]*cos(A[0]+A[1])
+
+    Sx[3] = Sx[2] + B[2]*sin(A[0]+A[1]+A[2])
+    Sy[3] = Sy[2] + B[2]*cos(A[0]+A[1]+A[2])
+
+    Sx[4] = Sx[3] + B[3]*sin(A[0]+A[1]+A[2]+A[3])
+    Sy[4] = Sy[3] + B[3]*cos(A[0]+A[1]+A[2]+A[3])
+
+    return Sx, Sy
+
+
+def calculAngle(B, x, y, t):
+    """ Calcule les angles du bras robot. """
+    
+    A = []
+    for i in range(len(B)):
+        A.append(0)
+
+    A[0] = 0 
+    
+    num = x**2 + (y-B[0])**2 + B[3]**2 - 2*B[3] * (x*sin(t) + (y-B[0])*cos(t)) - B[1]**2 - B[2]**2  
+    den = 2*B[1]*B[2]
+    r = num/den
+    
+    A[2] = acos(r)
+    
+    K = B[1] + B[2]*r 
+    num = K*(-B[0] + y - B[3]*cos(t)) + B[2]*sin(A[2])*(x-B[3]*sin(t)) 
+    den = K**2 + (B[2]**2)*(1-cos(A[2])**2)  
+    r = num/den
+
+    A[1] = acos(r)
+    
+    A[3] = t - A[0] - A[1] - A[2]
+    
+    return A
+
+
+def AffichageAngles(A):
+    """ Affiche les angles du bras robot. """
+    liste = []
+    largeur = 15
+
+    for i in range(len(A)):
+        liste.append([f"Angle {i} : ",f"{round(degrees(A[i]),3)} deg", f"{round(A[i],3)} rad"])
+    
+    print("\n" + largeur*3*"-")
+    console.tabDisplay(liste, largeur)
+    print(largeur*3*"-"+ "\n")
+
+
+def affichageBras(Sx, Sy,xmin,ymin,xmax,ymax):
+    """ Affiche les segments du bras robot. """
+    plt.clf()
+    plt.grid(True)
+    plt.xlim(xmin, xmax)
+    plt.ylim(ymin, ymax)
+    for i in range(len(Sx)-1):
+        plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+    plt.pause(0.05)
+    plt.show()
+ 
+
+def demonstration1(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax):
+    """ Animation du bras. """
+    while True:
+        while x < xmax:
+            x += 1
+            Sx, Sy = calculCoordonne(B, A)
+            affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
+        while x > xmin:
+            x-=1
+            Sx, Sy = calculCoordonne(Sx, Sy, x, B, A)
+            affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
+
+
+def demonstration2(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax):
+    """Animation des angles du bras."""
+    while True:
+
+        for i in range(len(A)):
+            A[i] += 1
+            if A[i] > 90:
+                A[i] = 0
+                
+        Sx, Sy = calculCoordonne(Sx, Sy, x, B, A)
+        affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
+
+
 def main():
 
-    # --- Paramètres du robot ---
-    # unité : mm et degré
+    # --- Paramètres objet ---
+    
+    x = 15  # distance de l'objet
+    y = 0   # hauteur de l'objet
+    t = pi  # angle d'approche
 
-    x = 150
-    h = 60
+    # --- Paramètres robot ---
+    
+    h = 60                # Hauteur du socle du bras
+    B = [h, 100, 80, 20]  # B0,B1,B2,B3 (longueur des segments en mm)
+    A = [0, 45, 45, 45]   # A0,A1,A2,A3 (angles entre les segments en degré)
 
-    B = [h, 100, 100, 60]
-    A = [45, 45, 45]
-    Sx = [0, 0, 0, 0, 0]
-    Sy = [0, h, 0, 0, 0]
+    # ---- Paramètres simulateur ---
 
-    theta =  A[0] + A[1] + A[2]
-    y = 0
+    xmin = -10
+    ymin = -10
+    xmax = sum(B)
+    ymax = sum(B)
 
     # --- Initialisation ---
 
     A = degreeToRadian(A)
-    
-    # --- Affichage ---
-    # Choisir l'affichage souhaité
-    
+    Sx = [0, 0, 0, 0, 0]
+    Sy = [0, 0, 0, 0, 0]
+
+    plt.figure()
+    plt.clf()
+    plt.grid(True)
+    plt.axis('equal')
+    plt.xlim(xmin, xmax)
+    plt.ylim(ymin, ymax)
+
+    # --- Simulateur ---
+      
     isEnd = False
+    
     while isEnd == False:
+        
         print("\nAffichage des segments du bras robot : "
-              "\n0. pour des angles à 45 degrés."
+              "\n0. pour des angles par défaut."
               "\n1. pour un objet à une distance x donnée."
-              "\n2. pour un objet à une distance x variant entrexmin et xmax."
+              "\n2. pour un objet à une distance x variant entre xmin et xmax."
               "\n3. avec des angles qui varient."
               "\n4. Quitter.")
+        
         choix = askFor.ABoundedNumber("Choix : ", 0, 4)
 
+        # On affiche les segments du bras robot avec les angles par défaut.
         if choix == 0:
-            Sx,Sy = calculCoordonne(Sx, Sy, B, A, h, x)
-            affichageBras(Sx, Sy)
+            Sx,Sy = calculCoordonne(B, A)
             AffichageAngles(A)
-            plt.show()
-
+            affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
+            
+        # On affiche les segments du bras robot avec les angles calculés pour atteindre un objet à une distance x donnée.
         elif choix == 1:
-            A = calculAngle(A, x, y, B, theta, h)
-            Sx,Sy = calculCoordonne(Sx, Sy, B, A, h, x)
-            affichageBras(Sx, Sy)
+            A = calculAngle(B, x, y, t)
+            Sx,Sy = calculCoordonne(B, A)
+            affichageBras(Sx, Sy, xmin, ymin, xmax, ymax)
             AffichageAngles(A)
-            plt.show() # Affiche la figure à l'écran
-
-        elif choix == 2:
-            demonstration1(Sx, Sy)
-            plt.show() # Affiche la figure à l'écran
         
+        # On affiche les segments du bras robot avec les angles calculés pour atteindre un objet à une distance x variant entre xmin et xmax.
+        elif choix == 2:
+            demonstration1(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax)
+        
+        # On affiche les segments du bras robot avec les angles qui varient.
         elif choix == 3:
-            demonstration2(Sx, Sy)
-            plt.show() # Affiche la figure à l'écran
+            demonstration2(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax)
 
         else :
             isEnd = True
