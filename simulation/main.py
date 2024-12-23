@@ -119,13 +119,45 @@ def demonstration2(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax):
         affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
 
 
+def demonstration3(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax, y, t, xMax, xMin):
+    """ Animation du bras. """
+    while True:
+        while x < xMax:
+            x += 1
+            A = calculAngle(B, x, y, t)  # Calculate new angles
+            Sx, Sy = calculCoordonne(B, A)
+            plt.clf()
+            plt.grid(True)
+            plt.axis('equal')
+            plt.xlim(xmin, xmax)
+            plt.ylim(ymin, ymax)
+            for i in range(len(Sx)-1):
+                plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+            plt.draw()
+            plt.pause(0.05)
+            
+        while x > xMin:
+            x -= 1
+            A = calculAngle(B, x, y, t)  # Calculate new angles
+            Sx, Sy = calculCoordonne(B, A)
+            plt.clf()
+            plt.grid(True)
+            plt.axis('equal')
+            plt.xlim(xmin, xmax)
+            plt.ylim(ymin, ymax)
+            for i in range(len(Sx)-1):
+                plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+            plt.draw()
+            plt.pause(0.05)
+
+
 def main():
 
     # --- Paramètres objet ---
     
     x = 15  # distance de l'objet
     y = 0   # hauteur de l'objet
-    t = pi  # angle d'approche
+    t = 3/4*pi  # angle d'approche
 
     # --- Paramètres robot ---
     
@@ -135,10 +167,13 @@ def main():
 
     # ---- Paramètres simulateur ---
 
-    xmin = -10
-    ymin = -10
-    xmax = sum(B)
-    ymax = sum(B)
+    xMax = 160
+    xMin = 30
+
+    axeXMin = -10
+    axeYMin = -10
+    AxeXMax = xMax+10
+    axeYMax = sum(B)/2
 
     # --- Initialisation ---
 
@@ -146,12 +181,12 @@ def main():
     Sx = [0, 0, 0, 0, 0]
     Sy = [0, 0, 0, 0, 0]
 
-    plt.figure()
+    plt.figure(figsize=(10, 8))
     plt.clf()
     plt.grid(True)
     plt.axis('equal')
-    plt.xlim(xmin, xmax)
-    plt.ylim(ymin, ymax)
+    plt.xlim(axeXMin, AxeXMax)
+    plt.ylim(axeYMin, axeYMax)
 
     # --- Simulateur ---
       
@@ -172,22 +207,22 @@ def main():
         if choix == 0:
             Sx,Sy = calculCoordonne(B, A)
             AffichageAngles(A)
-            affichageBras(Sx, Sy,xmin,ymin,xmax,ymax)
+            affichageBras(Sx, Sy,axeXMin,axeYMin,AxeXMax,axeYMax)
             
         # On affiche les segments du bras robot avec les angles calculés pour atteindre un objet à une distance x donnée.
         elif choix == 1:
             A = calculAngle(B, x, y, t)
             Sx,Sy = calculCoordonne(B, A)
-            affichageBras(Sx, Sy, xmin, ymin, xmax, ymax)
+            affichageBras(Sx, Sy, axeXMin, axeYMin, AxeXMax, axeYMax)
             AffichageAngles(A)
         
         # On affiche les segments du bras robot avec les angles calculés pour atteindre un objet à une distance x variant entre xmin et xmax.
         elif choix == 2:
-            demonstration1(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax)
+            demonstration3(Sx, Sy, x, B, A, axeXMin, axeYMin, AxeXMax, axeYMax, y, t, xMax, xMin)
         
         # On affiche les segments du bras robot avec les angles qui varient.
         elif choix == 3:
-            demonstration2(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax)
+            demonstration2(Sx, Sy, x, B, A, axeXMin, axeYMin, AxeXMax, axeYMax)
 
         else :
             isEnd = True
