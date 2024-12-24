@@ -1,0 +1,90 @@
+ 
+
+
+def demonstration1(Sx, Sy, x, B, A, xmin, ymin, xmax, ymax, y, t, xMax, xMin):
+    """ Animation du bras. """
+
+    while x < xMax:
+        x += 1
+        A = calculAngle(B, x, y, t)  # Calculate new angles
+        Sx, Sy = calculCoordonne(B, A)
+        plt.clf()
+        plt.grid(True)
+        plt.axis('equal')
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+        for i in range(len(Sx)-1):
+            plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+        plt.draw()
+        plt.pause(0.05)
+        
+    while x > xMin:
+        x -= 1
+        A = calculAngle(B, x, y, t)  # Calculate new angles
+        Sx, Sy = calculCoordonne(B, A)
+        plt.clf()
+        plt.grid(True)
+        plt.axis('equal')
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+        for i in range(len(Sx)-1):
+            plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+        plt.draw()
+        plt.pause(0.05)
+
+def GoTakeObject(Sx, Sy, x, B, A, AxeXMin, AxeYMin, AxeXMax, AxeYMax, y, t, xMax, xMin):
+    """Approche du bras robotique vers l'objet."""
+    
+    # 1. On affiche les segments du bras robot avec les angles par défaut.
+    # 2. On demande à l'utilisateur de saisir les coordonnées de l'objet.
+    # 3. On calcule les angles pour atteindre l'objet.
+    # 4. On affiche le bras qui tend progressivement vers la position de l'objet.
+    
+    # 1. On affiche les segments du bras robot avec les angles par défaut.
+
+    Sx,Sy = calculCoordonne(B, A)
+    plt.clf()
+    plt.grid(True)
+    plt.xlim(AxeXMin, AxeXMax)
+    plt.ylim(AxeYMin, AxeYMax)
+    for i in range(len(Sx)-1):
+        plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+    plt.pause(0.05)
+    plt.draw()
+
+    # 2. On demande à l'utilisateur de saisir les coordonnées de l'objet.
+
+    xTarget = askFor.ABoundedNumber("Distance de l'objet : ", xMin, xMax)
+    yTarget = askFor.ABoundedNumber("Hauteur de l'objet : ",0,100)
+    tTarget = askFor.ABoundedNumber("Angle d'approche : ",0,2*pi)
+
+    xPince = Sx[-1]
+    yPince = Sy[-1]
+    tPince = t
+
+    print(f"\nPosition actuelle de la pince : ({xPince},{yPince},{tPince})")
+    print(f"Position de l'objet : ({xTarget},{yTarget},{tTarget})")
+
+    # 3. On calcule les angles pour atteindre l'objet.
+    # 4. On affiche le bras qui tend progressivement vers la position de l'objet.
+
+    while xPince < xTarget:
+        x += 1
+        while yPince < yTarget:
+            y += 1
+            while tPince < tTarget:
+                t += 0.1
+                
+                A = calculAngle(B, x, y, t)
+                Sx, Sy = calculCoordonne(B, A)
+                plt.clf()
+                plt.grid(True)
+                plt.axis('equal')
+                plt.xlim(AxeXMin, AxeXMax)
+                plt.ylim(AxeXMin, AxeYMax)
+                for i in range(len(Sx)-1):
+                    plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
+                plt.draw()
+                plt.pause(0.05)
+
+
