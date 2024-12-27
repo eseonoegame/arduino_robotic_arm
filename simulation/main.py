@@ -61,7 +61,13 @@ class RobotArm :
 
     def show(self):
         """Dessine le bras robotique."""
-        Sx,Sy = self.calculCoordonne()
+        
+        # Calcul des coordonnées des points du bras robot pour pouvoir les afficher.
+        Sx,Sy = self.calculCoordonne() 
+        
+        # Affichage des segments du bras robot.
+        plt.clf()
+        plt.grid('equal')
         for i in range(len(Sx)-1):
             plt.plot([Sx[i], Sx[i+1]], [Sy[i], Sy[i+1]], label=f"B{i}")
         plt.pause(0.05)
@@ -99,6 +105,8 @@ class RobotArm :
         Sx[4] = Sx[3] + B[3]*sin(A[0]+A[1]+A[2]+A[3])
         Sy[4] = Sy[3] + B[3]*cos(A[0]+A[1]+A[2]+A[3])
 
+        self.Sx = Sx
+        self.Sy = Sy
         return Sx, Sy
 
     def calculAngle(self, target):
@@ -139,7 +147,8 @@ class RobotArm :
         """
         Approche le bras robotique vers un objet.
         Paramètres :
-        - target : les coordonnées de l'objet.
+        - start = [x,y] : les coordonnées du point de départ du bras.
+        - end = [x,y] : les coordonnées du point d'arrivée du bras.
         - animation : True pour afficher l'animation.
         """
         
@@ -149,36 +158,69 @@ class RobotArm :
         xEnd = end[0]
         yEnd = end[1]
 
-        while xStart != xEnd and yStart != yEnd:
+        # Set fixed plot parameters once before animation
+        plt.grid(True)
+        plt.axis('equal')
+
+        # Calculate axis limits to encompass entire movement
+        margin = 2  # Add margin for better visibility
+        xmin = min(xStart, xEnd, self.xRangeMin) - margin
+        xmax = max(xStart, xEnd, self.xRangeMax) + margin
+        ymin = min(yStart, yEnd, self.yRangeMin) - margin
+        ymax = max(yStart, yEnd, self.yRangeMax) + margin
+
+        plt.xlim(xmin, xmax)
+        plt.ylim(ymin, ymax)
+
+        while xStart != xEnd or yStart != yEnd:
 
             if xStart > xEnd:
                 while xStart > xEnd:
                     xStart -= 1
+                    target = Target(xStart,yStart,3/4*pi)
+                    A = self.calculAngle(target)
+                    self.goToPosition(A)
+                    if animation:
+                        self.show()
 
             elif xStart < xEnd:
                 while xStart < xEnd:
                     xStart += 1
+                    target = Target(xStart,yStart,3/4*pi)
+                    A = self.calculAngle(target)
+                    self.goToPosition(A)
+                    if animation:
+                        self.show()
 
             if yStart > yEnd:
                 while yStart > yEnd:
                     yStart -= 1
+                    target = Target(xStart,yStart,3/4*pi)
+                    A = self.calculAngle(target)
+                    self.goToPosition(A)
+                    if animation:
+                        self.show()
+
 
             elif yStart < yEnd:
                 while yStart < yEnd:
                     yStart += 1
+                    target = Target(xStart,yStart,3/4*pi)
+                    A = self.calculAngle(target)
+                    self.goToPosition(A)
+                    if animation:
+                        self.show()
   
-            target = Target(xStart,yStart,0)
-            A = self.calculAngle(target)
-            self.goToPosition(A,animation)
+
     
 
-    def goToPosition(self,A,animation = False):
+    def goToPosition(self,A):
         """
         Met le bras dans la position décrite par la liste d'angles A.
         """
         self.A = A
-        if animation == True:
-            self.show()
+        self.Sx,self.Sy = self.calculCoordonne()
+
 
 # --- Fonctions ---
 
@@ -187,23 +229,6 @@ def degreeToRadian(A):
     for i in range(len(A)):
         A[i] = radians(A[i])
     return A
-
-def demo1(bras,target):
-    
-    bras.calulAngle(target)
-    bras.goToPosition(bras.A,True)
-    
-    target.x = bras.Sx[-1]
-
-    while target.x < bras.xRangeMax:
-        target.x += 1
-        bras.calculAngle(target)
-        bras.goToPosition(bras.A,True)
-
-    while target.x > bras.xRangeMin:
-        target.x -= 1
-        bras.calculAngle(target)
-        bras.goToPosition(bras.A,True)
 
 def simulateur():
     
@@ -221,7 +246,8 @@ def simulateur():
 
     # --- Initialisation de la fenêtre graphique ---
 
-    plt.figure()
+    plt.figure(figsize=(10, 8))
+    plt.axis([axeXMin, AxeXMax, axeYMin, axeYMax])
 
     # --- Choix de la simulation ---
 
@@ -231,10 +257,10 @@ def simulateur():
         
         print("\nAffichage des segments du bras robot : ")
 
-        print("\n0. pour des angles par défaut."
+        print("0. pour des angles par défaut."
               "\n1. pour la pince sur un objet à une distance x,y donnée."
               "\n2. pour la pince sur un objet à une distance x variant entre xmin et xmax."
-              "\n3. pour aller attraper un objet depuis angle par défaut."
+              "\n3. pour bouger d'une position à une autre."
               "\n4. Quitter.")
         
         choix = askFor.ABoundedNumber("Choix : ", 0, 4)
@@ -248,19 +274,23 @@ def simulateur():
             target.y = askFor.ABoundedNumber("y : ", arm.yRangeMin, arm.yRangeMax)
             arm.calculAngle(target)
             arm.goToPosition(arm.A)
+            arm.show()
             #target.show()
 
         elif choix == 2:
-            target.y = 0
-            target.x = 30
-            demo1(arm,target)
 
+            xStart = 20
+            yStart = 0
+            xEnd = 90
+            yEnd = 0
+            arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True)
+        
         elif choix == 3:
-            arm.goToPosition([0,0,0,0],True)
-            target.x = arm.Sx[-1]
-            target.y = arm.Sy[-1]
-            arm.moovePinceToCoordonate(target,True)
-            target.show()
+            xStart = askFor.ABoundedNumber("xStart : ", arm.xRangeMin, arm.xRangeMax)
+            yStart = askFor.ABoundedNumber("yStart : ", arm.yRangeMin, arm.yRangeMax)
+            xEnd = askFor.ABoundedNumber("xEnd : ", arm.xRangeMin, arm.xRangeMax)
+            yEnd = askFor.ABoundedNumber("yEnd : ", arm.yRangeMin, arm.yRangeMax)
+            arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True)
 
         elif choix == 4: 
             isEnd = True 
