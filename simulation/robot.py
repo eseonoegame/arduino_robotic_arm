@@ -154,26 +154,26 @@ class RobotArm :
 
                 if x < xEnd :
                     x += 1
-                    if y < yEnd :
-                        y += 1
-                    else:
-                        y -= 1
-
-                if x > xEnd :
+                elif x > xEnd :
                     x -= 1
-                    if y < yEnd :
-                        y += 1
-                    else:
-                        y -= 1
+                else :
+                    # On ne bouge pas en x
+                    pass
+                if y < yEnd :
+                    y += 1
+                elif y > yEnd :
+                    y -= 1
+                else :
+                    # On ne bouge pas en y
+                    pass
                  
                 self.calculAngle([x,y])
                 self.calculCoordonne()
                 self.show()
-                print(f"debug {self.Sx[-1]} {self.Sy[-1]}")
+                #print(f"debug {self.Sx[-1]} {self.Sy[-1]}")
 
         # Si pas d'animation alors on calcul que la position finale.
         else :
             self.calculAngle(end)
             self.calculCoordonne()
             self.show([start[0],end[0]],[start[1],end[1]])
-

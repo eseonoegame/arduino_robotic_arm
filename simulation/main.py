@@ -26,9 +26,11 @@ def simulateur():
               "\n2. pour la pince sur un objet à une distance x,y donnée."
               "\n3. pour la pince sur un objet à une distance x variant entre xmin et xmax."
               "\n4. pour bouger d'une position à une autre."
-              "\n5. démo soutenance table.")
+              "\n5. démo soutenance table."
+              "\n6. démo soutenance carré."
+              "\n7. démo soutenance triangle.")
         
-        choix = askFor.ABoundedNumber("Choix : ", 0, 5)
+        choix = askFor.ABoundedNumber("Choix : ", 0, 7)
 
         if choix == 0: 
             isEnd = True
@@ -72,7 +74,45 @@ def simulateur():
                 yEnd = 30
                 arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True)
                 arm.moovePinceToCoordonate([xEnd,yEnd],[xStart,yStart],True)
+
+        elif choix == 6:
+            plt.figure(figsize=(9, 9))
+            while True:    
+                x1 = 50
+                y1 = 50
                 
+                x2 = 100
+                y2 = 50
+                
+                x3 = 100
+                y3 = 100
+
+                x4 = 50
+                y4 = 100
+
+                arm.moovePinceToCoordonate([x1,y1],[x2,y2],True)
+                arm.moovePinceToCoordonate([x2,y2],[x3,y3],True)
+                arm.moovePinceToCoordonate([x3,y3],[x4,y4],True)
+                arm.moovePinceToCoordonate([x4,y4],[x1,y1],True)
+
+        elif choix == 7:
+            plt.figure(figsize=(9, 9))
+            while True:    
+                
+                x1 = 50
+                y1 = 50
+                
+                x2 = 100
+                y2 = 50
+                
+                x3 = 100
+                y3 = 100
+
+                arm.moovePinceToCoordonate([x1,y1],[x2,y2],True)
+                arm.moovePinceToCoordonate([x2,y2],[x3,y3],True)
+                arm.moovePinceToCoordonate([x3,y3],[x1,y1],True)
+                
+
 
 if __name__ == "__main__":
     simulateur()
