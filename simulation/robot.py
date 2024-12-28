@@ -62,7 +62,7 @@ class RobotArm :
         
         # On affiche chaque segment du bras.
         for i in range(len(self.Sx)-1):
-            plt.plot([self.Sx[i], self.Sx[i+1]], [self.Sy[i], self.Sy[i+1]], label=f"B{i}")
+            plt.plot([self.Sx[i], self.Sx[i+1]], [self.Sy[i], self.Sy[i+1]], label=f"B{i}",linewidth=3)
         
         plt.tight_layout()
         plt.draw()
