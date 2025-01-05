@@ -31,9 +31,8 @@ Le code du projet se décompose en 2 parties :
 
 ### Partie simulation
 - `main.py` : code python pour simuler le bras robotique
-- `MyMath.py` : Les fonctions mathématiques pour calculer les angles des servos moteurs
-- `MyController` : réucpère les inputs de la manette XBOX
-- `MyVirtualArm.py` : classe pour gérer le bras robotique
+- `MyController` : récupère les inputs de la manette XBOX
+- `MyVirtualArm.py` : classe pour gérer le bras robotique + fonctions mathématiques pour calculer les angles des servos moteurs
 - `MyDisplay.py` : code pour afficher la simulation du bras robot
 - `MyCom.py` : code pour gérer la communication entre le PC et l'arduino
 - `MyDraw.py` : code pour dessiner avec le bras robotique
