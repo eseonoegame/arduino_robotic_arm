@@ -1,18 +1,25 @@
 """
 Simulateur du bras robotique.
 Objectif : trouver les angles des servomoteurs pour atteindre un objet à une distance x,y et la pince du bras dans un angle t.
-"""
+
+todo :
+- [ ] fix la fonction cercle qui marche pas
+- [ ] ajouter gestion erreur dans math du bras pour pas que programme plante
+- [ ] corriger erreur maths du bras
+- [ ] dissocier la simulation du bras
+- [ ] choix du mode de focntionnement : pilotage angle, pilotage position pince, attraper objet solo.
+- [ ] clean my controller : controne only la manette"""
 
 import askFor as askFor
-import console as console
-import matplotlib.pyplot as plt
-from math import *
-from robot import RobotArm
+from MyVirtualArm import *
+from MySimulation import *
+from MyControler import *
+from MyCom import *
 
-def simulateur():
+def main():
     
     # Création d'un objet RobotArm
-    arm = RobotArm([0, 45, 45, 45],[50, 80, 60, 20])
+    myArm = MyVirtualArm([0, 45, 45, 45],[50.0, 80.0, 60.0, 20.0])
 
     isEnd = False
     
@@ -20,99 +27,44 @@ def simulateur():
     # Affiche un menu pour choisir la simulation à effectuer
     while isEnd == False:
         
-        print("\nAffichage des segments du bras robot : ")
+        print("\nQue  souhaitez voue faire : ")
         print("0. Quitter."
-              "\n1. pour des angles par défaut."
-              "\n2. pour la pince sur un objet à une distance x,y donnée."
-              "\n3. pour la pince sur un objet à une distance x variant entre xmin et xmax."
-              "\n4. pour bouger d'une position à une autre."
-              "\n5. démo soutenance table."
-              "\n6. démo soutenance carré."
-              "\n7. démo soutenance triangle.")
+              "\n1. Lancer une démo du bras en simulation."
+              "\n2. Piloter le bras en simulation avec une manette Xbox."
+              "\n3. Piloter le bras avec une manette Xbox."
+              "\n4. Tester la manette Xbox."
+              "\n5. Demander au bras d'attraper un objet tout seul.")
+
         
-        choix = askFor.ABoundedNumber("Choix : ", 0, 7)
+        choix = askFor.ABoundedNumber("Choix : ", 0, 9)
 
         if choix == 0: 
             isEnd = True
 
+        # Lancer une démo du bras en simulation.
         elif choix == 1:
-            plt.figure(figsize=(9, 9))  # Création d'une fenêtre d'un certaine taille
-            arm.calculCoordonne()       # Calcul des coordonnées des points du bras pour pouvoir les afficher
-            arm.show()                  # Affichage des segments du bras
-            arm.showAngles()            # Affichage des angles des servomoteurs
+            chooseSimulation(myArm)
         
+        # Piloter le bras en simulation avec une manette Xbox."
         elif choix == 2:
-            plt.figure(figsize=(9, 9))
-            x = askFor.ABoundedNumber("x : ", arm.xRangeMin, arm.xRangeMax)
-            y = askFor.ABoundedNumber("y : ", arm.yRangeMin, arm.yRangeMax)
-            arm.calculAngle([x,y])       # Calcul des angles pour atteindre le point x,y
-            arm.calculCoordonne()        # Calcul des coordonnées des points du bras pour pouvoir les afficher 
-            arm.show()                   # Affichage des segments du bras
-
-        elif choix == 3:
-            plt.figure(figsize=(9, 9))
-            xStart = 20
-            yStart = 0
-            xEnd = 90
-            yEnd = 0
-            arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True) # Bouger la pince d'un point à un autre
+            controlArmInSimulationWithXboxControler(myArm)
+            pass
         
+        # Piloter le bras avec une manette Xbox.
+        elif choix == 3 :
+            controlArmWithXboxControler(myArm)
+            pass
+
+        # Tester la manette Xbox.
         elif choix == 4:
-            plt.figure(figsize=(9, 9))
-            xStart = askFor.ABoundedNumber("xStart : ", arm.xRangeMin, arm.xRangeMax)
-            yStart = askFor.ABoundedNumber("yStart : ", arm.yRangeMin, arm.yRangeMax)
-            xEnd = askFor.ABoundedNumber("xEnd : ", arm.xRangeMin, arm.xRangeMax)
-            yEnd = askFor.ABoundedNumber("yEnd : ", arm.yRangeMin, arm.yRangeMax)
-            arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True)
+            testXboxControler()
+            pass
 
+        # Demander au bras d'attraper un objet tout seul.
         elif choix == 5:
-            plt.figure(figsize=(9, 9))
-            while True:    
-                xStart = 50
-                yStart = 30
-                xEnd = 120
-                yEnd = 30
-                arm.moovePinceToCoordonate([xStart,yStart],[xEnd,yEnd],True)
-                arm.moovePinceToCoordonate([xEnd,yEnd],[xStart,yStart],True)
-
-        elif choix == 6:
-            plt.figure(figsize=(9, 9))
-            while True:    
-                x1 = 50
-                y1 = 50
-                
-                x2 = 100
-                y2 = 50
-                
-                x3 = 100
-                y3 = 100
-
-                x4 = 50
-                y4 = 100
-
-                arm.moovePinceToCoordonate([x1,y1],[x2,y2],True)
-                arm.moovePinceToCoordonate([x2,y2],[x3,y3],True)
-                arm.moovePinceToCoordonate([x3,y3],[x4,y4],True)
-                arm.moovePinceToCoordonate([x4,y4],[x1,y1],True)
-
-        elif choix == 7:
-            plt.figure(figsize=(9, 9))
-            while True:    
-                
-                x1 = 50
-                y1 = 50
-                
-                x2 = 100
-                y2 = 50
-                
-                x3 = 100
-                y3 = 100
-
-                arm.moovePinceToCoordonate([x1,y1],[x2,y2],True)
-                arm.moovePinceToCoordonate([x2,y2],[x3,y3],True)
-                arm.moovePinceToCoordonate([x3,y3],[x1,y1],True)
-                
+            #grabObject(myRoboticArm)
+            pass
 
 
 if __name__ == "__main__":
-    simulateur()
+    main()

@@ -8,7 +8,7 @@ def degreeToRadian(liste):
         liste[i] = radians(liste[i])
     return liste
 
-class RobotArm :
+class MyVirtualArm :
     def __init__(self,A,B):
         """ 
         Angle par défaut du bras robot. 
@@ -66,6 +66,30 @@ class RobotArm :
         
         plt.tight_layout()
         plt.draw()
+
+        def showWithTrace(self):
+            """Dessine le bras robot avec des points pour chaque position de la pince."""
+            plt.pause(0.05)
+            plt.clf()
+            plt.grid(True)
+            plt.axis('equal')
+            plt.title("Bras robotique")
+            plt.xlabel("x")
+            plt.ylabel("y")
+
+            # On définit les limites de l'affichage.
+            # On est dans une fenêtre carré (plt.figure(figsize=(9, 9))) donc on doit mettre les mêmes limites pour x et y sinon il y a des problèmes d'affichage.
+            plt.xlim(-10,180)
+            plt.ylim(-10,180)
+            
+            # On affiche chaque segment du bras.
+            for i in range(len(self.Sx)-1):
+                plt.plot([self.Sx[i], self.Sx[i+1]], [self.Sy[i], self.Sy[i+1]], label=f"B{i}",linewidth=3)
+            
+            # On affiche les points de la pince.
+            plt.plot(self.Sx[-1], self.Sy[-1], 'ro', label="Pince")
+            plt.tight_layout()
+            plt.draw()
 
     def calculCoordonne(self):
         """ 
@@ -138,7 +162,7 @@ class RobotArm :
         self.A = A
         return A
 
-    def moovePinceToCoordonate(self,start,end,animation = False):
+    def moovePinceToCoordonate(self,start,end,animation = False, t= None):
         """
         Déplace la pince du bras robotique d'une position start (x,y) à une position end (x,y). 
         """    
@@ -167,7 +191,7 @@ class RobotArm :
                     # On ne bouge pas en y
                     pass
                  
-                self.calculAngle([x,y])
+                self.calculAngle([x,y],t)
                 self.calculCoordonne()
                 self.show()
                 #print(f"debug {self.Sx[-1]} {self.Sy[-1]}")
