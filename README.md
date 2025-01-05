@@ -1,11 +1,24 @@
 # arduino_robotic_arm
 
 ## Présentation rapide
-Projet arduino pour un bras robotique. 
-Le projet se décompose en 2 parties : 
-- La partie arduino : bras robotique imprimé en 3D, articulé par des servosmoteurs, piloté par une carte arduino et joysticks.
-- La partie simulation : simulation du bras robotique dans un environnement 2D avec python pour vérifier les équations qui permettebt au bras d'attrapper un objet tout seul, en connaissant juste sa position.
 
+Projet : bras robotique arduino. 
+Objectif : Avoir un bras robotique qui peut :
+- être piloté par des joysticks (en angle ou en position de la pince)
+- être piloté par une manette XBOX (en angle ou en position de la pince)
+- attraper un objet tout seul, en connaissant juste sa position
+
+Le code du projet se décompose en 2 parties : 
+- La partie arduino : 
+    - Le code pour piloter le bras robotique avec les joystick
+    - Le code pour faire les maths pour pouvoir piloter la position de la pince du bras robotique 
+
+- La partie python :
+    - Le code pour simuler mathématiquement le bras robotique
+    - Le code pour afficher la simulation du bras robotique
+    - Le code pour récupérer les inputs de la manette XBOX
+    - Le code pour gérer la communication entre le PC et l'arduino
+    
 ## Décomposition du code
 
 ### Partie arduino
@@ -24,3 +37,11 @@ Le projet se décompose en 2 parties :
 - `MyDisplay.py` : code pour afficher la simulation du bras robot
 - `MyCom.py` : code pour gérer la communication entre le PC et l'arduino
 - `MyDraw.py` : code pour dessiner avec le bras robotique
+
+## Matériel
+
+- 1x Arduino Uno
+- 6x Servomoteurs MG996R
+- 2x Joysticks
+- 1x Manette XBOX
+- 1x capteur ultrason
