@@ -12,17 +12,18 @@ def degreeToRadian(liste):
 class MyVirtualArm:
     def __init__(self, A, B):
         """
-        Angle par défaut du bras robot.
-        Longueur des segments du bras robot.
+        Initialisation du bras robot.
         """
-        self.A = A
-        self.B = B
+        self.A = A  # Angle par défaut du bras robot.
+        self.B = B  # Longueur des segments du bras robot.
 
+        # Initialisation du rayon d'action du bras robot.
         self.xRangeMax = sum(B) - B[0]
         self.xRangeMin = 0
         self.yRangeMax = B[0] + B[1] - 30
         self.yRangeMin = 0
 
+        # Initialisation des coordonnées des points du bras robot.
         self.A = degreeToRadian(A)
         self.Sx = [0, 0, 0, 0, 0]
         self.Sy = [0, 0, 0, 0, 0]
@@ -86,33 +87,40 @@ class MyVirtualArm:
             A.append(0)
 
         # --- maths comliquées ---
+        try:
+            A[0] = 0
 
-        A[0] = 0
+            num = (
+                x**2
+                + (y - B[0]) ** 2
+                + B[3] ** 2
+                - 2 * B[3] * (x * sin(t) + (y - B[0]) * cos(t))
+                - B[1] ** 2
+                - B[2] ** 2
+            )
+            den = 2 * B[1] * B[2]
+            r = num / den
 
-        num = (
-            x**2
-            + (y - B[0]) ** 2
-            + B[3] ** 2
-            - 2 * B[3] * (x * sin(t) + (y - B[0]) * cos(t))
-            - B[1] ** 2
-            - B[2] ** 2
-        )
-        den = 2 * B[1] * B[2]
-        r = num / den
+            A[2] = acos(r)
 
-        A[2] = acos(r)
+            K = B[1] + B[2] * r
+            num = K * (-B[0] + y - B[3] * cos(t)) + B[2] * sin(A[2]) * (
+                x - B[3] * sin(t)
+            )
+            den = K**2 + (B[2] ** 2) * (1 - cos(A[2]) ** 2)
+            r = num / den
 
-        K = B[1] + B[2] * r
-        num = K * (-B[0] + y - B[3] * cos(t)) + B[2] * sin(A[2]) * (x - B[3] * sin(t))
-        den = K**2 + (B[2] ** 2) * (1 - cos(A[2]) ** 2)
-        r = num / den
+            A[1] = acos(r)
 
-        A[1] = acos(r)
+            A[3] = t - A[0] - A[1] - A[2]
 
-        A[3] = t - A[0] - A[1] - A[2]
+            self.A = A
 
-        self.A = A
-        return A
+        except ValueError:
+            print("Erreur : Le point est hors de portée. (maths error)")
+
+        finally:
+            return self.A
 
     def moovePinceToCoordonate(self, start, end, animation=False, t=None):
         """

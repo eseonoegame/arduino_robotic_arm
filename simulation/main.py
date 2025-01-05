@@ -3,11 +3,9 @@ Simulateur du bras robotique.
 Objectif : trouver les angles des servomoteurs pour atteindre un objet à une distance x,y et la pince du bras dans un angle t.
 
 todo :
-- [ ] fix la fonction cercle qui marche pas
-- [ ] ajouter gestion erreur dans math du bras pour pas que programme plante
 - [ ] corriger erreur maths du bras
-- [ ] choix du mode de focntionnement : pilotage angle, pilotage position pince, attraper objet solo.
-- [ ] clean my controller : controne only la manette
+- [ ] ajout choix du mode de focntionnement : pilotage angle, pilotage position pince, attraper objet solo.
+- [ ] clean MyControler pour que contrôle only la manette et pas gestion du bras.
 """
 
 import askFor
